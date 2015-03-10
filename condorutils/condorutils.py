@@ -1,7 +1,7 @@
 import re
 import os
 
-__all__ = ['getJobs', 'getSubContent', 'getSubArugment', 'getSubArguments', 'getSubCommand']
+__all__ = ['getJobs', 'getSubContent', 'getSubVariables', 'getSubArguments', 'getSubCommand']
 
 def getJobs(dagFileName, subFileName):
     with open(dagFileName) as dag:
@@ -41,5 +41,5 @@ def getSubArguments(subContent, subVariables):
     return re.sub(r'\$\((\w+)\)', lambda m: subVariables[m.group(1)], subContent['arguments'].strip(' \'"'))
 
 def getSubCommand(subContent, subVariables):
-    return '{executable} {arguments}'.format(executable=subVariables['executable'],
+    return '{executable} {arguments}'.format(executable=subContent['executable'],
                                              arguments=getSubArguments(subContent, subVariables))

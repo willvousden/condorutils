@@ -24,20 +24,21 @@ def getSubVariables(dagFileName, subFileName):
     subVariables = {}
 
     # Identify the job that relates to this sub file.
-    jobs = getJobs(dag, subFileName)
+    jobs = getJobs(dagFileName, subFileName)
     assert len(jobs) > 0, 'Couldn\'t find jobs.'
 
     with open(dagFileName, 'r') as dag:
         dagContent = dag.read()
     
     # Locate and extract the argument key/value pairs.
-    match = re.search(r'^VARS {:}.+$'.format(re.escape(jobs[0])), dagContent, re.MULTILINE)
+    match = re.search(r'^VARS {job}.+$'.format(job=re.escape(jobs[0])), dagContent, re.MULTILINE)
     matches = re.findall(r'(\w+)="(.*?)"', match.group(0))
     for k, v in matches:
         subVariables[k] = v
+    return subVariables
 
 def getSubArguments(subContent, subVariables):
-    return re.sub(r'\$\((\w+)\)', lambda m: subVariables[m.group(1)], subContent['arguments'])
+    return re.sub(r'\$\((\w+)\)', lambda m: subVariables[m.group(1)], subContent['arguments'].strip(' \'"'))
 
 def getSubCommand(subContent, subVariables):
     return '{executable} {arguments}'.format(executable=subVariables['executable'],

@@ -29,7 +29,7 @@ def getSubVariables(dagFileName, subFileName):
 
     with open(dagFileName, 'r') as dag:
         dagContent = dag.read()
-    
+
     # Locate and extract the argument key/value pairs.
     match = re.search(r'^VARS {job}.+$'.format(job=re.escape(jobs[0])), dagContent, re.MULTILINE)
     matches = re.findall(r'(\w+)="(.*?)"', match.group(0))
@@ -40,6 +40,13 @@ def getSubVariables(dagFileName, subFileName):
 def getSubArguments(subContent, subVariables):
     return re.sub(r'\$\((\w+)\)', lambda m: subVariables[m.group(1)], subContent['arguments'].strip(' \'"'))
 
-def getSubCommand(subContent, subVariables):
+def getSubCommand(subContent=None, subVariables=None, dagFileName=None, subFileName=None):
+    if subContent is None or subVariables is None:
+        if dagFileName is None and subFileName is None:
+            raise ValueError('Insufficient information.')
+
+        subContent = getSubContent(subFileName)
+        subVariables = getSubVariables(dagFileName, subFileName)
+
     return '{executable} {arguments}'.format(executable=subContent['executable'],
                                              arguments=getSubArguments(subContent, subVariables))
